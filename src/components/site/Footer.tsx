@@ -11,7 +11,7 @@ export const Footer = () => {
             <span className="h-9 w-9 rounded-sm bg-gradient-ember grid place-items-center">
               <span className="font-display text-primary-foreground text-lg leading-none">K</span>
             </span>
-            <div className="font-display text-xl">Kalpana Hardware</div>
+            <div className="font-display text-xl">SPK Hardware</div>
           </div>
           <p className="mt-4 text-sm text-muted-foreground max-w-sm leading-relaxed">
             Three generations of trusted plywood, doors and finishing materials —
@@ -25,7 +25,7 @@ export const Footer = () => {
               <Mail className="h-4 w-4 text-primary" /> hello@kalpanahardware.in
             </a>
             <div className="flex items-center gap-3 text-muted-foreground">
-              <MapPin className="h-4 w-4 text-primary" /> Main Road, Industrial Area
+              <MapPin className="h-4 w-4 text-primary" /> Near Bank of India, Kadapa Road, Khajipeta.
             </div>
           </div>
         </div>
@@ -46,8 +46,8 @@ export const Footer = () => {
         <div className="md:col-span-4">
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-4">Visit the showroom</div>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Mon — Sat · 9:30 AM to 8:00 PM<br />
-            Sunday · 10:00 AM to 2:00 PM
+            Mon — Sat · 8:30 AM to 8:00 PM<br />
+            Sunday · 8:30 AM to 12:00 PM
           </p>
           <Link
             to="/contact"
@@ -59,8 +59,8 @@ export const Footer = () => {
       </div>
       <div className="border-t border-border">
         <div className="container py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <div>© {new Date().getFullYear()} Kalpana Hardware. All rights reserved.</div>
-          <div>Crafted with care · Built on Lovable</div>
+          <div>© {new Date().getFullYear()} SPK Hardware. All rights reserved.</div>
+          <div>Crafted with care · Built on Trust</div>
         </div>
       </div>
     </footer>

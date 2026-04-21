@@ -40,7 +40,7 @@ export const AdminLayout = () => {
             <span className="font-display text-primary-foreground text-base leading-none">K</span>
           </span>
           <div className="leading-tight">
-            <div className="font-display text-base">Kalpana</div>
+            <div className="font-display text-base">SPK</div>
             <div className="text-[9px] uppercase tracking-[0.22em] text-primary">Admin Panel</div>
           </div>
         </Link>

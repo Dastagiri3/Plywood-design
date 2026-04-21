@@ -38,11 +38,11 @@ export const Navbar = () => {
       <div className="container flex h-16 md:h-20 items-center justify-between gap-6">
         <Link to="/" className="flex items-center gap-3 group">
           <span className="relative h-9 w-9 rounded-sm bg-gradient-ember grid place-items-center shadow-ember">
-            <span className="font-display text-primary-foreground text-lg leading-none">K</span>
+            <span className="font-display text-primary-foreground text-lg leading-none">SPK</span>
             <span className="absolute inset-0 rounded-sm ring-1 ring-primary/40 group-hover:ring-primary/80 transition" />
           </span>
           <div className="leading-tight">
-            <div className="font-display text-lg md:text-xl tracking-tight">Kalpana Hardware</div>
+            <div className="font-display text-lg md:text-xl tracking-tight">SPK Hardware</div>
             <div className="text-[10px] md:text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               Plywood · Doors · Laminates
             </div>
