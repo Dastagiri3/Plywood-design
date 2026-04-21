@@ -1,7 +1,8 @@
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Menu, X, Search } from "lucide-react";
+import { Menu, X, Search, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const links = [
   { to: "/", label: "Home" },
@@ -14,6 +15,7 @@ export const Navbar = () => {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const loc = useLocation();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -81,6 +83,14 @@ export const Navbar = () => {
           >
             <Search className="h-4 w-4" /> Search catalog
           </Link>
+          {isAdmin && (
+            <Link
+              to="/admin"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors ml-3"
+            >
+              <Shield className="h-4 w-4" /> Admin
+            </Link>
+          )}
           <Link
             to="/contact"
             className="ml-3 inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium bg-gradient-ember text-primary-foreground rounded-sm shadow-ember hover:brightness-110 transition"
