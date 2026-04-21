@@ -109,7 +109,7 @@ const ProductDetail = () => {
 
           <div className="mt-6 flex items-center gap-3 text-sm">
             {product.in_stock ? (
-              <span className="inline-flex items-center gap-1.5 text-emerald-400">
+              <span className="inline-flex items-center gap-1.5 text-primary">
                 <Check className="h-4 w-4" /> In stock — ready to dispatch
               </span>
             ) : (

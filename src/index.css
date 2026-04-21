@@ -117,6 +117,9 @@
     background-size: 64px 64px;
   }
 
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
   .noise::before {
     content: '';
     position: absolute; inset: 0;
