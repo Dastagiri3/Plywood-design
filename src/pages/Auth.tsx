@@ -32,15 +32,17 @@ const Auth = () => {
       toast.error(parsed.error.issues[0]?.message ?? "Invalid input");
       return;
     }
+    const { email: e2, password: p2 } = parsed.data;
     setBusy(true);
     if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword(parsed.data);
+      const { error } = await supabase.auth.signInWithPassword({ email: e2, password: p2 });
       setBusy(false);
       if (error) return toast.error(error.message);
       toast.success("Welcome back");
     } else {
       const { error } = await supabase.auth.signUp({
-        ...parsed.data,
+        email: e2,
+        password: p2,
         options: { emailRedirectTo: `${window.location.origin}/admin` },
       });
       setBusy(false);
