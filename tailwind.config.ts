@@ -13,15 +13,23 @@ export default {
       },
     },
     extend: {
+        fontFamily: {
+          serif: ['"DM Serif Display"', 'serif'],
+          sans: ['"Fira Sans"', 'system-ui', 'sans-serif'],
+          display: ['"DM Serif Display"', 'serif'],
+        },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+          surface: "hsl(var(--surface))",
+          "surface-2": "hsl(var(--surface-2))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+            glow: "hsl(var(--primary-glow))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -84,6 +92,10 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "ember-pulse": "ember-pulse 4s ease-in-out infinite",
+        "float-up": "float-up 0.7s var(--ease-out-expo) both",
+        "shimmer": "shimmer 2.5s linear infinite",
+        "slow-zoom": "slow-zoom 12s ease-out forwards",
       },
     },
   },
