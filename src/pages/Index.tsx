@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, ShieldCheck, Truck, Hammer, Sparkles } from "lucide-react";
+import { ArrowRight, ShieldCheck, Truck, Hammer, Sparkles, WandSparkles } from "lucide-react";
 import hero from "@/assets/hero-warehouse.jpg";
 import { CATEGORIES } from "@/lib/categories";
 import { supabase } from "@/integrations/supabase/client";
@@ -186,6 +186,31 @@ const Index = () => {
           </div>
         </section>
       )}
+
+      <section className="border-y border-border bg-card/30">
+        <div className="container py-16 md:py-20 grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <div>
+            <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-primary mb-4">
+              <WandSparkles className="h-4 w-4" /> 04 — Visualize Laminates
+            </div>
+            <h2 className="font-display text-4xl md:text-5xl text-balance max-w-2xl">
+              Upload your room and test laminate finishes before you inquire.
+            </h2>
+            <p className="mt-5 max-w-xl text-muted-foreground leading-relaxed">
+              Compare woodgrains, mattes and statement surfaces in your own kitchen or wardrobe photo with an AI-generated concept preview.
+            </p>
+          </div>
+
+          <div className="flex lg:justify-end">
+            <Link
+              to="/visualizer"
+              className="inline-flex items-center gap-2 px-7 py-4 bg-gradient-ember text-primary-foreground rounded-sm font-medium tracking-wide shadow-ember hover:brightness-110 transition"
+            >
+              Open laminate visualizer <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* CTA */}
       <section className="container pb-24 md:pb-32">

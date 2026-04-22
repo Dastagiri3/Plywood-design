@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
-import { Search, X } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Search, Sparkles, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORIES, CategoryKey } from "@/lib/categories";
 import { ProductCard, ProductCardData } from "@/components/site/ProductCard";
@@ -85,6 +85,25 @@ const Products = () => {
               className="w-full bg-card border border-border focus:border-primary outline-none rounded-sm pl-11 pr-4 py-3.5 text-sm transition"
             />
           </form>
+
+          <div className="mt-8 max-w-2xl rounded-sm border border-border bg-card/50 p-5 md:p-6">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-primary">
+                  <Sparkles className="h-3.5 w-3.5" /> Laminate visualizer
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Upload your room photo and preview laminate finishes before sending an inquiry.
+                </p>
+              </div>
+              <Link
+                to="/visualizer"
+                className="inline-flex items-center justify-center gap-2 rounded-sm bg-gradient-ember px-5 py-3 text-sm font-medium text-primary-foreground shadow-ember transition hover:brightness-110"
+              >
+                Try the visualizer
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
