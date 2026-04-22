@@ -77,10 +77,11 @@ const Auth = () => {
             </p>
           </div>
 
-          <form onSubmit={submit} className="space-y-3">
+          <form onSubmit={submit} className="space-y-3" autoComplete="off">
             <input
               type="email"
-              autoComplete="email"
+              autoComplete="off"
+              name="admin-login-email"
               placeholder="Email"
               className="w-full bg-input/60 border border-border focus:border-primary outline-none rounded-sm px-4 py-3 text-sm transition"
               value={email}
@@ -90,7 +91,8 @@ const Auth = () => {
             />
             <input
               type="password"
-              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              autoComplete="new-password"
+              name="admin-login-password"
               placeholder="Password"
               className="w-full bg-input/60 border border-border focus:border-primary outline-none rounded-sm px-4 py-3 text-sm transition"
               value={password}
