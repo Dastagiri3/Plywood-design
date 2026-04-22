@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Check, MessageCircle, Phone } from "lucide-react";
+import { ArrowLeft, Check, MessageCircle, Phone, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { CATEGORY_LABEL, CategoryKey, resolveImage } from "@/lib/categories";
 import { InquiryForm } from "@/components/site/InquiryForm";
@@ -135,6 +135,15 @@ const ProductDetail = () => {
             <p className="text-xs text-muted-foreground mt-1">
               Trade & bulk discounts available for contractors and architects.
             </p>
+
+            {product.category === "laminates" && (
+              <Link
+                to={`/visualizer?product=${product.id}`}
+                className="mt-4 inline-flex items-center gap-2 text-sm text-primary hover:opacity-80 transition"
+              >
+                <Sparkles className="h-4 w-4" /> Preview this laminate in your room
+              </Link>
+            )}
 
             <div className="mt-5 grid sm:grid-cols-2 gap-3">
               <a
