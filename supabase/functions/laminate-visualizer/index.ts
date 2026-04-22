@@ -1,7 +1,10 @@
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.57.4/cors";
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const AI_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
