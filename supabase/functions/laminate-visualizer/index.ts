@@ -5,6 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
+const dataUrlPattern = /^data:image\/[a-zA-Z0-9.+-]+;base64,[A-Za-z0-9+/=\s]+$/;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -24,11 +25,11 @@ serve(async (req) => {
     const laminateName = typeof body?.laminateName === "string" ? body.laminateName.trim() : "";
     const notes = typeof body?.notes === "string" ? body.notes.trim() : "";
 
-    if (!roomImage || !roomImage.startsWith("data:image/")) {
+    if (!roomImage || !dataUrlPattern.test(roomImage)) {
       return json({ error: "A room image is required." }, 400);
     }
 
-    if (!laminateReferenceImage || !laminateReferenceImage.startsWith("data:image/")) {
+    if (!laminateReferenceImage || !dataUrlPattern.test(laminateReferenceImage)) {
       return json({ error: "A laminate reference image is required." }, 400);
     }
 
