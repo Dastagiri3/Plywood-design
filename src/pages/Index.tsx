@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight, ShieldCheck, Truck, Hammer, Sparkles, WandSparkles } from "lucide-react";
 import hero from "@/assets/hero-warehouse.jpg";
 import { CATEGORIES } from "@/lib/categories";
-import { supabase } from "@/integrations/supabase/client";
+import { collection, getDocs, query, where, orderBy, limit } from "firebase/firestore";
+import { db } from "@/integrations/firebase/client";
 import { ProductCard, ProductCardData } from "@/components/site/ProductCard";
 
 const Index = () => {
@@ -16,12 +17,12 @@ const Index = () => {
     if (meta) meta.setAttribute("content", "Premium plywood, doors, hinges, kitchen sets and laminates. Crafted catalog, three generations of trust.");
 
     (async () => {
-      const [{ data: news }, { data: trend }] = await Promise.all([
-        supabase.from("products").select("*").eq("is_new", true).order("created_at", { ascending: false }).limit(8),
-        supabase.from("products").select("*").eq("is_trending", true).order("created_at", { ascending: false }).limit(4),
+      const [newsSnap, trendSnap] = await Promise.all([
+        getDocs(query(collection(db, "products"), where("is_new", "==", true), orderBy("created_at", "desc"), limit(8))),
+        getDocs(query(collection(db, "products"), where("is_trending", "==", true), orderBy("created_at", "desc"), limit(4))),
       ]);
-      setNewArrivals((news ?? []) as ProductCardData[]);
-      setTrending((trend ?? []) as ProductCardData[]);
+      setNewArrivals(newsSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as ProductCardData[]);
+      setTrending(trendSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as ProductCardData[]);
     })();
   }, []);
 

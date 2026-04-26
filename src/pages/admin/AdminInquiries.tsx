@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, Phone, Mail, Package, Check, Archive, Search } from "lucide-react";
 import { Link } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { collection, doc, getDocs, updateDoc, query, orderBy, getDoc } from "firebase/firestore";
+import { db } from "@/integrations/firebase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -34,19 +35,19 @@ const AdminInquiries = () => {
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
-        .from("inquiries")
-        .select("*")
-        .order("created_at", { ascending: false });
-      if (error) toast.error(error.message);
-      const list = (data ?? []) as Inquiry[];
+      const snap = await getDocs(query(collection(db, "inquiries"), orderBy("created_at", "desc")));
+      const list = snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Inquiry[];
       setItems(list);
 
       const ids = Array.from(new Set(list.map((i) => i.product_id).filter(Boolean))) as string[];
       if (ids.length) {
-        const { data: prods } = await supabase.from("products").select("id, name").in("id", ids);
         const map: Record<string, string> = {};
-        (prods as ProductLite[] | null)?.forEach((p) => (map[p.id] = p.name));
+        await Promise.all(
+          ids.map(async (pid) => {
+            const pSnap = await getDoc(doc(db, "products", pid));
+            if (pSnap.exists()) map[pid] = (pSnap.data() as { name: string }).name;
+          })
+        );
         setProducts(map);
       }
       setLoading(false);
@@ -56,12 +57,12 @@ const AdminInquiries = () => {
   const setStatus = async (id: string, status: string) => {
     const prev = items;
     setItems((it) => it.map((x) => (x.id === id ? { ...x, status } : x)));
-    const { error } = await supabase.from("inquiries").update({ status }).eq("id", id);
-    if (error) {
-      setItems(prev);
-      toast.error(error.message);
-    } else {
+    try {
+      await updateDoc(doc(db, "inquiries", id), { status });
       toast.success(`Marked as ${status}`);
+    } catch {
+      setItems(prev);
+      toast.error("Failed to update status");
     }
   };
 

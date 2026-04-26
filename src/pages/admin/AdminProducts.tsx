@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Plus, Search, Pencil, Trash2, Loader2, Sparkles, TrendingUp } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { collection, getDocs, doc, deleteDoc, query, orderBy } from "firebase/firestore";
+import { db } from "@/integrations/firebase/client";
 import { CATEGORY_LABEL, CategoryKey, resolveImage } from "@/lib/categories";
 import { toast } from "sonner";
 
@@ -27,13 +28,15 @@ const AdminProducts = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) toast.error(error.message);
-    setProducts((data ?? []) as Product[]);
-    setLoading(false);
+    try {
+      const snap = await getDocs(query(collection(db, "products"), orderBy("created_at", "desc")));
+      setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as Product[]);
+    } catch (e) {
+      toast.error("Failed to load products");
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -58,10 +61,13 @@ const AdminProducts = () => {
 
   const remove = async (id: string, name: string) => {
     if (!confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    toast.success("Product deleted");
-    setProducts((p) => p.filter((x) => x.id !== id));
+    try {
+      await deleteDoc(doc(db, "products", id));
+      toast.success("Product deleted");
+      setProducts((p) => p.filter((x) => x.id !== id));
+    } catch {
+      toast.error("Failed to delete product");
+    }
   };
 
   return (

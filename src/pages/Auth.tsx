@@ -3,7 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "@/integrations/firebase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 const schema = z.object({
@@ -34,20 +38,19 @@ const Auth = () => {
     }
     const { email: e2, password: p2 } = parsed.data;
     setBusy(true);
-    if (mode === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email: e2, password: p2 });
+    try {
+      if (mode === "login") {
+        await signInWithEmailAndPassword(auth, e2, p2);
+        toast.success("Welcome back");
+      } else {
+        await createUserWithEmailAndPassword(auth, e2, p2);
+        toast.success("Account created — contact admin to get admin access.");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "An error occurred";
+      toast.error(msg);
+    } finally {
       setBusy(false);
-      if (error) return toast.error(error.message);
-      toast.success("Welcome back");
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email: e2,
-        password: p2,
-        options: { emailRedirectTo: `${window.location.origin}/admin` },
-      });
-      setBusy(false);
-      if (error) return toast.error(error.message);
-      toast.success("Account created — check your email to verify.");
     }
   };
 
@@ -73,7 +76,7 @@ const Auth = () => {
             <p className="text-sm text-muted-foreground mt-1">
               {mode === "login"
                 ? "Manage products and customer inquiries."
-                : "New admin account — needs role assignment."}
+                : "New account — admin access must be granted manually."}
             </p>
           </div>
 

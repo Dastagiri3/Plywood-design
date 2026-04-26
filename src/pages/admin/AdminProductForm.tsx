@@ -3,7 +3,20 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Loader2, Upload, X } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  collection,
+  doc,
+  getDoc,
+  addDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+import { db, storage } from "@/integrations/firebase/client";
 import { CATEGORIES, CategoryKey, resolveImage } from "@/lib/categories";
 
 const schema = z.object({
@@ -44,9 +57,9 @@ const AdminProductForm = () => {
   useEffect(() => {
     if (isNew) return;
     (async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("id", id!).maybeSingle();
-      if (error) toast.error(error.message);
-      if (data) {
+      const snap = await getDoc(doc(db, "products", id!));
+      if (snap.exists()) {
+        const data = snap.data();
         setForm({
           name: data.name,
           category: data.category as CategoryKey,
@@ -57,6 +70,8 @@ const AdminProductForm = () => {
           is_trending: data.is_trending,
           images: data.images ?? [],
         });
+      } else {
+        toast.error("Product not found");
       }
       setLoading(false);
     })();
@@ -75,18 +90,16 @@ const AdminProductForm = () => {
         toast.error(`${file.name} is larger than 5MB`);
         continue;
       }
-      const ext = file.name.split(".").pop() ?? "jpg";
-      const path = `products/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("product-images").upload(path, file, {
-        cacheControl: "3600",
-        upsert: false,
-      });
-      if (error) {
-        toast.error(`Upload failed: ${error.message}`);
-        continue;
+      try {
+        const ext = file.name.split(".").pop() ?? "jpg";
+        const path = `products/${crypto.randomUUID()}.${ext}`;
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        uploaded.push(url);
+      } catch {
+        toast.error(`Upload failed for ${file.name}`);
       }
-      const { data: { publicUrl } } = supabase.storage.from("product-images").getPublicUrl(path);
-      uploaded.push(publicUrl);
     }
     setForm((f) => ({ ...f, images: [...f.images, ...uploaded] }));
     setUploading(false);
@@ -123,18 +136,26 @@ const AdminProductForm = () => {
       is_trending: form.is_trending,
       images: form.images,
     };
-    if (isNew) {
-      const { error } = await supabase.from("products").insert(payload);
-      setSaving(false);
-      if (error) return toast.error(error.message);
-      toast.success("Product created");
+    try {
+      if (isNew) {
+        await addDoc(collection(db, "products"), {
+          ...payload,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+        toast.success("Product created");
+      } else {
+        await updateDoc(doc(db, "products", id!), {
+          ...payload,
+          updated_at: new Date().toISOString(),
+        });
+        toast.success("Product updated");
+      }
       navigate("/admin/products");
-    } else {
-      const { error } = await supabase.from("products").update(payload).eq("id", id!);
+    } catch {
+      toast.error("Failed to save product");
+    } finally {
       setSaving(false);
-      if (error) return toast.error(error.message);
-      toast.success("Product updated");
-      navigate("/admin/products");
     }
   };
 
@@ -308,5 +329,9 @@ const AdminProductForm = () => {
     </div>
   );
 };
+
+// serverTimestamp imported but not used inline since we use ISO strings for consistency
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+void serverTimestamp;
 
 export default AdminProductForm;

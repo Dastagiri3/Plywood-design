@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import type { User } from "firebase/auth";
+import { onAuthStateChanged, signOut as fbSignOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/integrations/firebase/client";
 
 type AuthCtx = {
   user: User | null;
-  session: Session | null;
   isAdmin: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
@@ -12,59 +13,37 @@ type AuthCtx = {
 
 const Ctx = createContext<AuthCtx>({
   user: null,
-  session: null,
   isAdmin: false,
   loading: true,
   signOut: async () => {},
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const syncSession = async (sess: Session | null) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-
-      if (!sess?.user) {
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
+        // Admin check: presence of /admins/{uid} document = admin
+        const snap = await getDoc(doc(db, "admins", firebaseUser.uid));
+        setIsAdmin(snap.exists());
+      } else {
         setIsAdmin(false);
-        setLoading(false);
-        return;
       }
-
-      setLoading(true);
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: sess.user.id,
-        _role: "admin",
-      });
-
-      setIsAdmin(!error && Boolean(data));
       setLoading(false);
-    };
-
-    // Set listener BEFORE getSession to avoid races
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setTimeout(() => {
-        void syncSession(sess);
-      }, 0);
     });
-
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      void syncSession(sess);
-    });
-
-    return () => sub.subscription.unsubscribe();
+    return unsub;
   }, []);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    await fbSignOut(auth);
   };
 
   return (
-    <Ctx.Provider value={{ user, session, isAdmin, loading, signOut }}>{children}</Ctx.Provider>
+    <Ctx.Provider value={{ user, isAdmin, loading, signOut }}>{children}</Ctx.Provider>
   );
 };
 

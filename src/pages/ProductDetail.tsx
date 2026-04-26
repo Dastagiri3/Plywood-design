@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, Check, MessageCircle, Phone, Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { collection, doc, getDoc, getDocs, query, where, limit } from "firebase/firestore";
+import { db } from "@/integrations/firebase/client";
 import { CATEGORY_LABEL, CategoryKey, resolveImage } from "@/lib/categories";
 import { InquiryForm } from "@/components/site/InquiryForm";
 import { ProductCard, ProductCardData } from "@/components/site/ProductCard";
@@ -21,17 +22,20 @@ const ProductDetail = () => {
     if (!id) return;
     setLoading(true);
     (async () => {
-      const { data } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
-      if (data) {
-        setProduct(data as Product);
+      const snap = await getDoc(doc(db, "products", id));
+      if (snap.exists()) {
+        const data = { id: snap.id, ...snap.data() } as Product;
+        setProduct(data);
         document.title = `${data.name} — Kalpana Hardware`;
-        const { data: rel } = await supabase
-          .from("products")
-          .select("*")
-          .eq("category", data.category)
-          .neq("id", id)
-          .limit(4);
-        setRelated((rel ?? []) as ProductCardData[]);
+        const relSnap = await getDocs(
+          query(collection(db, "products"), where("category", "==", data.category), limit(5))
+        );
+        setRelated(
+          relSnap.docs
+            .map((d) => ({ id: d.id, ...d.data() }) as ProductCardData)
+            .filter((p) => p.id !== id)
+            .slice(0, 4)
+        );
       }
       setLoading(false);
     })();

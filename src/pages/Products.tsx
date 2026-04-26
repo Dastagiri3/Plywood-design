@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Sparkles, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
+import { db } from "@/integrations/firebase/client";
 import { CATEGORIES, CategoryKey } from "@/lib/categories";
 import { ProductCard, ProductCardData } from "@/components/site/ProductCard";
 import { cn } from "@/lib/utils";
@@ -22,11 +23,12 @@ const Products = () => {
     let active = true;
     setLoading(true);
     (async () => {
-      let query = supabase.from("products").select("*").order("created_at", { ascending: false });
-      if (cat) query = query.eq("category", cat);
-      const { data } = await query;
+      let q = cat
+        ? query(collection(db, "products"), where("category", "==", cat), orderBy("created_at", "desc"))
+        : query(collection(db, "products"), orderBy("created_at", "desc"));
+      const snap = await getDocs(q);
       if (!active) return;
-      setItems((data ?? []) as ProductCardData[]);
+      setItems(snap.docs.map((d) => ({ id: d.id, ...d.data() })) as ProductCardData[]);
       setLoading(false);
     })();
     return () => {

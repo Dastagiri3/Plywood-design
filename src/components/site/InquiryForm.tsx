@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "@/integrations/firebase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -33,20 +34,23 @@ export const InquiryForm = ({ productId, productName }: { productId?: string; pr
       return;
     }
     setLoading(true);
-    const { error } = await supabase.from("inquiries").insert({
-      name: parsed.data.name,
-      phone: parsed.data.phone,
-      email: parsed.data.email || null,
-      message: parsed.data.message,
-      product_id: productId ?? null,
-    });
-    setLoading(false);
-    if (error) {
+    try {
+      await addDoc(collection(db, "inquiries"), {
+        name: parsed.data.name,
+        phone: parsed.data.phone,
+        email: parsed.data.email || null,
+        message: parsed.data.message,
+        product_id: productId ?? null,
+        status: "new",
+        created_at: new Date().toISOString(),
+      });
+      toast.success("Inquiry sent — we'll be in touch shortly.");
+      setForm({ name: "", phone: "", email: "", message: "" });
+    } catch {
       toast.error("Could not send. Please try again.");
-      return;
+    } finally {
+      setLoading(false);
     }
-    toast.success("Inquiry sent — we'll be in touch shortly.");
-    setForm({ name: "", phone: "", email: "", message: "" });
   };
 
   const field =

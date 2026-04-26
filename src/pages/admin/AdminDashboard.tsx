@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Package, Inbox, Sparkles, TrendingUp, ArrowRight, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { collection, getDocs, query, where, orderBy, limit, getCountFromServer } from "firebase/firestore";
+import { db } from "@/integrations/firebase/client";
 import { CATEGORY_LABEL } from "@/lib/categories";
 
 type Inquiry = {
@@ -21,21 +22,22 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     (async () => {
-      const [{ count: total }, { count: news }, { count: trend }, { count: inqNew }, { data: rec }] =
-        await Promise.all([
-          supabase.from("products").select("*", { count: "exact", head: true }),
-          supabase.from("products").select("*", { count: "exact", head: true }).eq("is_new", true),
-          supabase.from("products").select("*", { count: "exact", head: true }).eq("is_trending", true),
-          supabase.from("inquiries").select("*", { count: "exact", head: true }).eq("status", "new"),
-          supabase.from("inquiries").select("*").order("created_at", { ascending: false }).limit(5),
-        ]);
+      const productsRef = collection(db, "products");
+      const inquiriesRef = collection(db, "inquiries");
+      const [totalSnap, newSnap, trendSnap, inqSnap, recSnap] = await Promise.all([
+        getCountFromServer(productsRef),
+        getCountFromServer(query(productsRef, where("is_new", "==", true))),
+        getCountFromServer(query(productsRef, where("is_trending", "==", true))),
+        getCountFromServer(query(inquiriesRef, where("status", "==", "new"))),
+        getDocs(query(inquiriesRef, orderBy("created_at", "desc"), limit(5))),
+      ]);
       setStats({
-        products: total ?? 0,
-        newProducts: news ?? 0,
-        trending: trend ?? 0,
-        newInquiries: inqNew ?? 0,
+        products: totalSnap.data().count,
+        newProducts: newSnap.data().count,
+        trending: trendSnap.data().count,
+        newInquiries: inqSnap.data().count,
       });
-      setRecent((rec ?? []) as Inquiry[]);
+      setRecent(recSnap.docs.map((d) => ({ id: d.id, ...d.data() })) as Inquiry[]);
       setLoading(false);
     })();
   }, []);
