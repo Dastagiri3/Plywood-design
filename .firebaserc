@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "default": "hardware-store-b0749",
+    "production": "hardware-store-b0749"
+  }
+}
